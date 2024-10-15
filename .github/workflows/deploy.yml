@@ -1,4 +1,4 @@
-name: Deploy API to Heroku
+name: Deploy Streamlit App to Heroku
 
 on:
   push:
