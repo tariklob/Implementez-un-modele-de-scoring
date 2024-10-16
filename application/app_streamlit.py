@@ -24,8 +24,8 @@ with open('best_xgb_model.pkl', 'rb') as f:
 with open('scaler.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
-# Extract the final model from the pipeline (e.g., XGBoost)
-model = bestmodel.named_steps['xgb']  # Remplacer 'classifier' par le nom correct de l'étape dans votre pipeline
+# Extract the final model from the pipeline
+model = bestmodel.named_steps['xgb']
 
 # Function to get customer data
 def get_customer_data(SK_ID_CURR):
