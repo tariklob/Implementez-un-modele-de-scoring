@@ -1,0 +1,22 @@
+# Exclure les fichiers compilés Python
+*.pyc
+__pycache__/
+
+# Exclure les fichiers de configuration et de documentation
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.eggs/
+*.whl
+tests/
+docs/
+
+# Exclure les fichiers de données et les modèles
+data_test.csv
+best_xgb_model.pkl
+scaler.pkl
+
+# Exclure les fichiers de logs et temporaires
+*.log
+*.tmp
