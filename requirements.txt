@@ -3,8 +3,8 @@ joblib==1.4.2
 imbalanced-learn==0.12.4
 xgboost==2.1.1
 numpy==2.0.2
-pandas==2.0.3
-scikit-learn==1.5.2
+pandas==1.5.3
+cikit-learn==1.5.2
 shap==0.46.0
 streamlit==1.39.0
 requests==2.32.3
