@@ -72,10 +72,10 @@ if st.button("Get Credit Score"):
                 gauge={'axis': {'range': [0, 100]},
                        'bar': {'color': "blue"},
                        'steps': [
-                           {'range': [0, 40], 'color': "green"},  # Accepted
-                           {'range': [40, 100], 'color': "red"}  # Rejected
+                           {'range': [0, 60], 'color': "red"},  # Rejected
+                           {'range': [60, 100], 'color': "green"}  #  Accepted
                        ],
-                       'threshold': {'line': {'color': "black", 'width': 4}, 'thickness': 0.75, 'value': 40}}
+                       'threshold': {'line': {'color': "black", 'width': 4}, 'thickness': 0.75, 'value': 60}}
             ))
             st.plotly_chart(fig)
     else:
