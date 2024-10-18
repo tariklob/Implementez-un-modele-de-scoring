@@ -1,19 +1,17 @@
 matplotlib
-numpy
 lime
 streamlit==1.39.0
 requests==2.32.3
-
-plotly==5.6.0 
-
-
 pip==21.3
-
-shap==0.39.0 
 Werkzeug==0.16.1
-
-pandas==1.4.0
 flask==2.2.2
+imbalanced-learn==0.12.3
+xgboost==2.1.1
+numpy==1.24.3
+pandas==2.0.3
+scikit-learn==1.5.2
+plotly==5.24.1
+shap==0.46.0
 
 
 
