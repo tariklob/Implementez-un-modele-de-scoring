@@ -1,4 +1,4 @@
-echo '{
+{
   "environments": {
     "test": {
       "scripts": {
@@ -7,4 +7,4 @@ echo '{
       }
     }
   }
-}' > app.json
+}
