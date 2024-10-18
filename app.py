@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 import pandas as pd
 import pickle
 import shap
+import os
 
 app = Flask(__name__)
 
@@ -71,4 +72,5 @@ def shap_explanation():
     return jsonify({'shap_values': shap_values.tolist()})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 8080))  # Utilise le port fourni ou 8080 par défaut
+    app.run(debug=True, port=port)

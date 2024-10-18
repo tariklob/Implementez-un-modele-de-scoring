@@ -1,0 +1,10 @@
+echo '{
+  "environments": {
+    "test": {
+      "scripts": {
+        "test-setup": "pip install -r requirements.txt",
+        "test": "pytest"
+      }
+    }
+  }
+}' > app.json
