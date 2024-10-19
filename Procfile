@@ -1,4 +1,4 @@
-web: gunicorn api_flask/app.py
+web: gunicorn app:app
 
 
 
