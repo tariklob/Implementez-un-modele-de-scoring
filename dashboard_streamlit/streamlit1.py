@@ -18,11 +18,11 @@ df_test = pd.read_csv('data_test.csv')
 X_sample = df_test.drop(columns=['TARGET', 'SK_ID_CURR'])
 
 # Charger le modèle (pipeline)
-with open('dashboard_streamlit/best_xgb_model.pkl', 'rb') as f:
+with open('best_xgb_model.pkl', 'rb') as f:
     bestmodel = pickle.load(f)
 
 # Charger le scaler
-with open('dashboard_streamlit/scaler.pkl', 'rb') as f:
+with open('scaler.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
 # Extraire le modèle final du pipeline
