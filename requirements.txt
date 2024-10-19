@@ -1,11 +1,11 @@
 
-shap==0.46.0 
+#shap==0.46.0 
 
 
-setuptools==75.2.0
+#setuptools==75.2.0
 
 
-werkzeug>=2.2.2
+#werkzeug>=2.2.2
 
 
 pandas
