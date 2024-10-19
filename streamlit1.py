@@ -11,7 +11,7 @@ import pickle
 import numpy as np
 
 # URL de l'API Flask
-BASE_URL = "https://1807-2a02-842b-46d-3d01-2811-b729-1bba-bd33.ngrok-free.app"
+BASE_URL = "http://127.0.0.1:8080"
 
 # Charger les données de test
 df_test = pd.read_csv('data_test.csv')
