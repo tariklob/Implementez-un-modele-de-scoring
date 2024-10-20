@@ -1,24 +1,14 @@
-
-#shap==0.46.0 
-
-
-#setuptools==75.2.0
-
-
-#werkzeug>=2.2.2
-
-
 pandas
 numpy
-scikit-learn
-plotly
-shap
-matplotlib
-lime
-streamlit
-requests
-pip
-Werkzeug
-flask
-imbalanced-learn
-xgboost
+scikit-learn==1.5.2
+plotly==5.24.1
+shap==0.46.0
+matplotlib==3.5.0  # Mise à jour vers une version plus stable et compatible
+lime>=0.2.0.1  # Mettre à jour Lime pour correspondre à matplotlib
+streamlit==1.39.0
+requests==2.32.3
+pip>=24.2
+Werkzeug==3.0.1
+flask==2.2.2
+imbalanced-learn==0.12.3
+xgboost==2.1.1
