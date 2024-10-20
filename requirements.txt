@@ -14,3 +14,4 @@ imbalanced-learn
 xgboost
 llvmlite
 joblib
+numba
