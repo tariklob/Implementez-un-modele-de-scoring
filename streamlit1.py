@@ -11,7 +11,7 @@ import pickle
 import numpy as np
 
 # URL de l'API Flask
-BASE_URL = "http://127.0.0.1:8080"
+BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
 
 # Charger les données de test
 df_test = pd.read_csv('data_test.csv')
