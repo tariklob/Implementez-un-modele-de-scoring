@@ -1,6 +1,6 @@
 pandas
 numpy
-scikit-learn=
+scikit-learn
 plotly
 shap
 matplotlib
