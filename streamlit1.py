@@ -139,18 +139,29 @@ if st.button("Get Local Explanation"):
     if SK_ID_CURR:
         # Obtenir les données du client pour l'explication LIME
         X_cust = X_sample.loc[df_test['SK_ID_CURR'] == int(SK_ID_CURR)]
-        X_cust_scaled = scaler.transform(X_cust)
+        
+        # Assurez-vous que les colonnes de X_cust correspondent à celles du scaler
+        X_cust_aligned = X_cust[scaler.feature_names_in_]
+        
+        # Traiter les valeurs manquantes
+        X_cust_aligned.fillna(0, inplace=True)  # Remplir avec 0 (ou utilisez une autre méthode)
 
-        # Créer un explainer LIME pour les données
-        explainer = LimeTabularExplainer(X_sample.values, feature_names=X_sample.columns,
-                                         class_names=['Rejected', 'Accepted'], mode='classification')
+        # Vérifier si X_cust_aligned n'est pas vide avant la transformation
+        if not X_cust_aligned.empty:
+            X_cust_scaled = scaler.transform(X_cust_aligned)
 
-        # Générer l'explication pour le client avec LIME
-        exp = explainer.explain_instance(X_cust_scaled[0], model.predict_proba, num_features=10)
+            # Créer un explainer LIME pour les données
+            explainer = LimeTabularExplainer(X_sample.values, feature_names=X_sample.columns,
+                                             class_names=['Rejected', 'Accepted'], mode='classification')
 
-        # Afficher le graphique LIME dans Streamlit
-        fig = exp.as_pyplot_figure()
-        plt.title('Importance Locale des Variables (LIME)')
-        st.pyplot(fig)
+            # Générer l'explication pour le client avec LIME
+            exp = explainer.explain_instance(X_cust_scaled[0], model.predict_proba, num_features=10)
+
+            # Afficher le graphique LIME dans Streamlit
+            fig = exp.as_pyplot_figure()
+            plt.title('Importance Locale des Variables (LIME)')
+            st.pyplot(fig)
+        else:
+            st.warning("Les données du client ne sont pas disponibles.")
     else:
         st.warning("Veuillez sélectionner un ID client.")
