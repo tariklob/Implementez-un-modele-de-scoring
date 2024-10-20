@@ -13,3 +13,4 @@ flask
 imbalanced-learn
 xgboost
 llvmlite
+joblib
