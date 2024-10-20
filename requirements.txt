@@ -1,15 +1,15 @@
-pandas
-numpy
+numpy==1.26.4
+pandas==2.0.3
 scikit-learn==1.2.2
 plotly==5.24.1
 shap==0.46.0
-matplotlib==3.5.0  # Mise à jour vers une version plus stable et compatible
+matplotlib==3.7.2 # Mise à jour vers une version plus stable et compatible
 lime>=0.2.0.1  # Mettre à jour Lime pour correspondre à matplotlib
 streamlit==1.39.0
 requests==2.32.3
 pip>=24.2
-Werkzeug==3.0.1
-flask==2.2.2
-imbalanced-learn==0.12.3
-xgboost==2.1.1
+Werkzeug==2.3.6
+flask==2.3.2
+imbalanced-learn==0.10.1
+xgboost==1.7.5
 llvmlite==0.38.0
