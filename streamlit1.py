@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import lime
 from lime.lime_tabular import LimeTabularExplainer
 import matplotlib.pyplot as plt
-import joblib
+import pickle
 import numpy as np
 
 # URL de l'API Flask
@@ -18,10 +18,12 @@ df_test = pd.read_csv('data_test.csv')
 X_sample = df_test.drop(columns=['TARGET', 'SK_ID_CURR'])
 
 # Charger le modèle (pipeline)
-bestmodel = joblib.load('best_xgb_model.joblib')
+with open('best_xgb_model.pkl', 'rb') as f:
+    bestmodel = pickle.load(f)
 
 # Charger le scaler
-scaler = joblib.load('scaler.joblib')
+with open('scaler.pkl', 'rb') as f:
+    scaler = pickle.load(f)
 
 # Extraire le modèle final du pipeline
 model = bestmodel.named_steps['xgb']
@@ -169,14 +171,4 @@ if st.button("Get Local Explanation"):
                 exp = explainer.explain_instance(X_cust_scaled[0], model.predict_proba, num_features=10)
 
                 # Afficher le graphique LIME dans Streamlit
-                fig = exp.as_pyplot_figure()
-                plt.title('Importance Locale des Variables (LIME)')
-                st.pyplot(fig)
-            else:
-                st.warning("Les données du client ne sont pas disponibles.")
-        except ValueError as e:
-            st.error(f"Erreur lors de la transformation des données : {e}")
-            st.error(f"Noms des caractéristiques attendus : {scaler.feature_names_in_}")
-            st.error(f"Noms des caractéristiques fournis : {X_cust.columns}")
-    else:
-        st.warning("Veuillez sélectionner un ID client.")
+                fig = exp.as_pyplot
