@@ -1,26 +1,18 @@
-# Imports nécessaires
-import matplotlib.pyplot as plt  # Assurez-vous d'importer pyplot
-import streamlit as st
-import numpy as np
 import pandas as pd
 import pickle
-import requests
+import numpy as np
+import streamlit as st
 from lime.lime_tabular import LimeTabularExplainer
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-# BASE_URL de l'API Flask (à changer en fonction du déploiement)
-BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
+# URL de l'API Flask
+# BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
 
 # Charger les données de test
 df_test = pd.read_csv('data_test.csv')
-
-# Remplacer les valeurs manquantes par 0 dans les données de test
-df_test.fillna(0, inplace=True)
-
-# Préparer les données d'entrée en supprimant les colonnes non nécessaires
-X_sample = df_test.drop(columns=['TARGET', 'SK_ID_CURR'])
+X_sample = df_test.drop(columns=['TARGET', 'SK_ID_CURR']).fillna(0)  # Remplacer les valeurs manquantes par 0
 
 # Charger le modèle (pipeline)
 with open('best_xgb_model.pkl', 'rb') as f:
@@ -33,7 +25,7 @@ with open('scaler.pkl', 'rb') as f:
 # Extraire le modèle final du pipeline
 model = bestmodel.named_steps['xgb']
 
-# Fonction pour obtenir les données du client depuis l'API
+# Fonction pour obtenir les données du client
 def get_customer_data(SK_ID_CURR):
     response = requests.get(f'{BASE_URL}/app/data_cust_test/', params={'SK_ID_CURR': SK_ID_CURR})
     if response.status_code == 200:
@@ -94,8 +86,11 @@ if st.button("Get Global Explanation"):
     explainer = LimeTabularExplainer(X_sample.values, feature_names=X_sample.columns,
                                      class_names=['Rejected', 'Accepted'], mode='classification')
 
-    # Sélectionner un échantillon de données pour les explications locales avec random_state pour reproductibilité
-    sample_indices = np.random.choice(X_sample.index, size=100, replace=False, random_state=42)  # Ajout du random_state
+    # Fixer la graine pour la reproductibilité
+    np.random.seed(42)  # Fixer la graine ici
+
+    # Sélectionner un échantillon de données pour les explications locales
+    sample_indices = np.random.choice(X_sample.index, size=100, replace=False)
     sample_data = X_sample.loc[sample_indices]
     sample_data_scaled = scaler.transform(sample_data)
 
@@ -143,22 +138,22 @@ if st.button("Get Local Explanation"):
     if SK_ID_CURR:
         # Obtenir les données du client pour l'explication LIME
         X_cust = X_sample.loc[df_test['SK_ID_CURR'] == int(SK_ID_CURR)]
-        X_cust_scaled = scaler.transform(X_cust)
-
-        # Créer un explainer LIME pour les données
-        explainer = LimeTabularExplainer(X_sample.values, feature_names=X_sample.columns,
-                                         class_names=['Rejected', 'Accepted'], mode='classification')
-
-        # Générer l'explication pour le client avec LIME
-        exp = explainer.explain_instance(X_cust_scaled[0], model.predict_proba, num_features=10)
-
-        # Créer le graphique LIME
-        fig = exp.as_pyplot_figure()
-
-        # Fermer le graphique explicitement pour éviter des conflits d'affichage
-        plt.close(fig)
         
-        # Utiliser st.pyplot(fig) après avoir défini correctement fig
-        st.pyplot(fig)
+        if X_cust.empty:
+            st.warning("Aucune donnée trouvée pour cet ID client.")
+        else:
+            X_cust_scaled = scaler.transform(X_cust)
+
+            # Créer un explainer LIME pour les données
+            explainer = LimeTabularExplainer(X_sample.values, feature_names=X_sample.columns,
+                                             class_names=['Rejected', 'Accepted'], mode='classification')
+
+            # Générer l'explication pour le client avec LIME
+            exp = explainer.explain_instance(X_cust_scaled[0], model.predict_proba, num_features=10)
+
+            # Afficher le graphique LIME dans Streamlit
+            fig = exp.as_pyplot_figure()
+            plt.title('Importance Locale des Variables (LIME)')
+            st.pyplot(fig)
     else:
         st.warning("Veuillez sélectionner un ID client.")
