@@ -8,7 +8,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 
 # URL de l'API Flask
-# BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
+BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
 
 # Charger les données de test
 df_test = pd.read_csv('data_test.csv')
