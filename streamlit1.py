@@ -1,20 +1,19 @@
 import pandas as pd
-import numpy as np
 import pickle
 import requests
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
-from lime.lime_tabular import LimeTabularExplainer
-import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
+from lime.lime_tabular import LimeTabularExplainer
+import numpy as np
+import matplotlib.pyplot as plt
 
-# URL de l'API Flask
 BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
 
 # Charger les données de test
 df_test = pd.read_csv('data_test.csv')
-X_sample = df_test.drop(columns=['TARGET', 'SK_ID_CURR']).fillna(0)  # Remplacer les valeurs manquantes par 0
+X_sample = df_test.drop(columns=['TARGET', 'SK_ID_CURR'])
 
 # Charger le modèle (pipeline)
 with open('best_xgb_model.pkl', 'rb') as f:
@@ -27,6 +26,7 @@ with open('scaler.pkl', 'rb') as f:
 # Extraire le modèle final du pipeline
 model = bestmodel.named_steps['xgb']
 
+
 # Fonction pour obtenir les données du client
 def get_customer_data(SK_ID_CURR):
     response = requests.get(f'{BASE_URL}/app/data_cust_test/', params={'SK_ID_CURR': SK_ID_CURR})
@@ -35,6 +35,7 @@ def get_customer_data(SK_ID_CURR):
     else:
         st.error(f"API error: {response.status_code}")
         return None
+
 
 # Interface utilisateur Streamlit
 st.title("Credit Risk Prediction Dashboard")
@@ -49,7 +50,8 @@ if st.button("Get Customer Data"):
         customer_data = get_customer_data(SK_ID_CURR)
         if customer_data:
             # Convertir les données en DataFrame et traiter les valeurs booléennes
-            data = {k: (v if not isinstance(v, dict) else list(v.values())[0]) for k, v in customer_data['data'].items()}
+            data = {k: (v if not isinstance(v, dict) else list(v.values())[0]) for k, v in
+                    customer_data['data'].items()}
             st.table(pd.DataFrame([data]))  # Afficher les données sous forme de tableau
     else:
         st.warning("Veuillez sélectionner un ID client.")
@@ -88,19 +90,24 @@ if st.button("Get Global Explanation"):
     explainer = LimeTabularExplainer(X_sample.values, feature_names=X_sample.columns,
                                      class_names=['Rejected', 'Accepted'], mode='classification')
 
-    # Fixer la graine pour la reproductibilité
-    np.random.seed(42)  # Fixer la graine ici
-
     # Sélectionner un échantillon de données pour les explications locales
-    sample_indices = np.random.choice(X_sample.index, size=100, replace=False)
+    sample_indices = X_sample.index
     sample_data = X_sample.loc[sample_indices]
-    sample_data_scaled = scaler.transform(sample_data)
+
+    # Assurez-vous que le scaler ne sélectionne que les caractéristiques présentes dans X_sample
+    caractéristiques_communes = [caractéristique for caractéristique in scaler.feature_names_in_ if
+                                 caractéristique in X_sample.columns]
+    scaler = scaler.fit(X_sample[caractéristiques_communes])
+
+    # Transformez les données d'échantillon en utilisant le scaler mis à jour
+    sample_data_scaled = scaler.transform(sample_data[caractéristiques_communes])
 
     # Générer des explications locales pour chaque instance de l'échantillon
     feature_importances = np.zeros(X_sample.shape[1])
     for i in range(sample_data_scaled.shape[0]):
         exp = explainer.explain_instance(sample_data_scaled[i], model.predict_proba, num_features=X_sample.shape[1])
         for feature, importance in exp.as_list():
+            # Nettoyer le nom de la caractéristique pour correspondre aux noms des colonnes
             clean_feature = feature.split(' <= ')[0].split(' > ')[0].strip()
             if clean_feature in X_sample.columns:
                 feature_index = X_sample.columns.get_loc(clean_feature)
@@ -114,11 +121,13 @@ if st.button("Get Global Explanation"):
 
     # Graphique pour les valeurs fortes (les 15 caractéristiques les plus importantes)
     high_importance_df = importance_df.sort_values(by='Importance', ascending=False).head(15)
-    fig_high = px.bar(high_importance_df, x='Importance', y='Feature', orientation='h', title="Global Feature Importance (High Values)", color_discrete_sequence=['blue'])
+    fig_high = px.bar(high_importance_df, x='Importance', y='Feature', orientation='h',
+                      title="Global Feature Importance (High Values)", color_discrete_sequence=['blue'])
 
     # Graphique pour les valeurs faibles (les 15 caractéristiques les moins importantes)
     low_importance_df = importance_df.sort_values(by='Importance', ascending=True).head(15)
-    fig_low = px.bar(low_importance_df, x='Importance', y='Feature', orientation='h', title="Global Feature Importance (Low Values)", color_discrete_sequence=['red'])
+    fig_low = px.bar(low_importance_df, x='Importance', y='Feature', orientation='h',
+                     title="Global Feature Importance (Low Values)", color_discrete_sequence=['red'])
 
     # Créer des sous-graphiques
     fig = make_subplots(rows=1, cols=2, shared_yaxes=True, subplot_titles=("High Values", "Low Values"))
@@ -140,11 +149,16 @@ if st.button("Get Local Explanation"):
     if SK_ID_CURR:
         # Obtenir les données du client pour l'explication LIME
         X_cust = X_sample.loc[df_test['SK_ID_CURR'] == int(SK_ID_CURR)]
-        
-        if X_cust.empty:
-            st.warning("Aucune donnée trouvée pour cet ID client.")
-        else:
-            X_cust_scaled = scaler.transform(X_cust)
+
+        # Assurez-vous que les colonnes de X_cust correspondent à celles du scaler
+        X_cust_aligned = X_cust[scaler.feature_names_in_]
+
+        # Traiter les valeurs manquantes
+        X_cust_aligned.fillna(0, inplace=True)  # Remplir avec 0 (ou utilisez une autre méthode)
+
+        # Vérifier si X_cust_aligned n'est pas vide avant la transformation
+        if not X_cust_aligned.empty:
+            X_cust_scaled = scaler.transform(X_cust_aligned)
 
             # Créer un explainer LIME pour les données
             explainer = LimeTabularExplainer(X_sample.values, feature_names=X_sample.columns,
