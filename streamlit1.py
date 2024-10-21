@@ -146,23 +146,39 @@ if st.button("Get Global Explanation"):
 
 # Pour les explications locales avec LIME
 if st.button("Get Local Explanation"):
-    if SK_ID_CURR:
-        # Obtenir les données du client pour l'explication LIME
-        X_cust = X_sample.loc[df_test['SK_ID_CURR'] == int(SK_ID_CURR)]
+    if SK_ID_CURR != '':
+        SK_ID_CURR_int = int(SK_ID_CURR)
 
-        # Assurez-vous que les colonnes de X_cust correspondent à celles du scaler
+        # Obtenir les données du client pour l'explication LIME
+        X_cust = X_sample.loc[df_test['SK_ID_CURR'] == SK_ID_CURR_int]
+
+        # Assurez-vous que le scaler ne sélectionne que les caractéristiques présentes dans X_sample
+        caractéristiques_communes = [caractéristique for caractéristique in scaler.feature_names_in_
+                                     if caractéristique in X_sample.columns]
+        scaler = scaler.fit(X_sample[caractéristiques_communes])
+
+        # Vérifier si les colonnes de X_cust correspondent à celles du scaler
+        missing_cols = set(scaler.feature_names_in_) - set(X_cust.columns)
+        if missing_cols:
+            # Ajouter les colonnes manquantes avec des valeurs par défaut
+            for col in missing_cols:
+                X_cust[col] = 0
+
+        # S'assurer que les colonnes sont dans le bon ordre pour le scaler
         X_cust_aligned = X_cust[scaler.feature_names_in_]
 
         # Traiter les valeurs manquantes
-        X_cust_aligned.fillna(0, inplace=True)  # Remplir avec 0 (ou utilisez une autre méthode)
+        X_cust_aligned.fillna(0, inplace=True)  # Remplir avec 0
 
         # Vérifier si X_cust_aligned n'est pas vide avant la transformation
         if not X_cust_aligned.empty:
             X_cust_scaled = scaler.transform(X_cust_aligned)
 
             # Créer un explainer LIME pour les données
-            explainer = LimeTabularExplainer(X_sample.values, feature_names=X_sample.columns,
-                                             class_names=['Rejected', 'Accepted'], mode='classification')
+            explainer = LimeTabularExplainer(X_sample[caractéristiques_communes].values,
+                                             feature_names=caractéristiques_communes,
+                                             class_names=['Rejected', 'Accepted'],
+                                             mode='classification')
 
             # Générer l'explication pour le client avec LIME
             exp = explainer.explain_instance(X_cust_scaled[0], model.predict_proba, num_features=10)
