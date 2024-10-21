@@ -1,10 +1,12 @@
 import pandas as pd
-import pickle
 import numpy as np
+import pickle
+import requests
 import streamlit as st
-from lime.lime_tabular import LimeTabularExplainer
 import plotly.graph_objects as go
 import plotly.express as px
+from lime.lime_tabular import LimeTabularExplainer
+import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 
 # URL de l'API Flask
