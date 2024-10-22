@@ -4,7 +4,7 @@ scikit-learn
 plotly
 shap
 matplotlib
-lime
+lime==0.2.0.1
 streamlit
 requests
 pip
@@ -14,4 +14,4 @@ imbalanced-learn
 xgboost
 llvmlite
 joblib
-numba
+numba==0.60

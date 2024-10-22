@@ -9,6 +9,7 @@ from lime.lime_tabular import LimeTabularExplainer
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
 
 # Charger les données de test
@@ -74,12 +75,12 @@ if st.button("Get Credit Score"):
                 gauge={'axis': {'range': [0, 100]},
                        'bar': {'color': "blue"},
                        'steps': [
-                           {'range': [0, 40], 'color': "red"},  # Rejected
-                           {'range': [40, 100], 'color': "green"}  # Accepted
+                           {'range': [0, 50], 'color': "red"},  # Rejected
+                           {'range': [50, 100], 'color': "green"}  # Accepted
                        ],
-                       'threshold': {'line': {'color': "black", 'width': 4}, 'thickness': 0.75, 'value': 40}}
+                       'threshold': {'line': {'color': "black", 'width': 4}, 'thickness': 0.75, 'value': 50}}
             ))
-            fig.update_layout(height=800)  # Doubler la hauteur
+            fig.update_layout(height=400)  # Doubler la hauteur
             st.plotly_chart(fig)
     else:
         st.warning("Veuillez sélectionner un ID client.")
@@ -119,30 +120,19 @@ if st.button("Get Global Explanation"):
     # Créer un DataFrame pour les importances des caractéristiques
     importance_df = pd.DataFrame({'Feature': X_sample.columns, 'Importance': feature_importances})
 
-    # Graphique pour les valeurs fortes (les 15 caractéristiques les plus importantes)
-    high_importance_df = importance_df.sort_values(by='Importance', ascending=False).head(15)
+    # Graphique pour les valeurs fortes (les 10 caractéristiques les plus importantes)
+    high_importance_df = importance_df.sort_values(by='Importance', ascending=False).head(10)
     fig_high = px.bar(high_importance_df, x='Importance', y='Feature', orientation='h',
                       title="Global Feature Importance (High Values)", color_discrete_sequence=['blue'])
 
-    # Graphique pour les valeurs faibles (les 15 caractéristiques les moins importantes)
-    low_importance_df = importance_df.sort_values(by='Importance', ascending=True).head(15)
+    # Graphique pour les valeurs faibles (les 10 caractéristiques les moins importantes)
+    low_importance_df = importance_df.sort_values(by='Importance', ascending=True).head(10)
     fig_low = px.bar(low_importance_df, x='Importance', y='Feature', orientation='h',
                      title="Global Feature Importance (Low Values)", color_discrete_sequence=['red'])
 
-    # Créer des sous-graphiques
-    fig = make_subplots(rows=1, cols=2, shared_yaxes=True, subplot_titles=("High Values", "Low Values"))
-
-    # Ajouter les graphiques aux sous-graphiques
-    for trace in fig_high['data']:
-        fig.add_trace(trace, row=1, col=1)
-    for trace in fig_low['data']:
-        fig.add_trace(trace, row=1, col=2)
-
-    # Mettre à jour la mise en page
-    fig.update_layout(height=1200, title_text="Global Feature Importance", showlegend=False)  # Augmenter la hauteur
-
     # Afficher les graphiques dans Streamlit
-    st.plotly_chart(fig)
+    st.plotly_chart(fig_high)
+    st.plotly_chart(fig_low)
 
 # Pour les explications locales avec LIME
 if st.button("Get Local Explanation"):
