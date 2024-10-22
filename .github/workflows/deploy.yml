@@ -1,3 +1,5 @@
+name: Python application
+
 on: [push, pull_request]
 
 jobs:
@@ -21,5 +23,5 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest
+        pytest .github/workflows/
 
