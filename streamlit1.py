@@ -9,6 +9,7 @@ from lime.lime_tabular import LimeTabularExplainer
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
 
 # Charger les données de test
