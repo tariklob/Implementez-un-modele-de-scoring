@@ -65,6 +65,22 @@ if st.button("Get Credit Score"):
             score = score_data['score']
             decision = score_data['decision']
             st.markdown(f"<h3>Score: {score * 100:.2f}% - Decision: {decision}</h3>", unsafe_allow_html=True)
+
+            # Graphique de jauge
+            fig = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=score * 100,
+                title={'text': "Credit Score"},
+                gauge={'axis': {'range': [0, 100]},
+                       'bar': {'color': "blue"},
+                       'steps': [
+                           {'range': [0, 50], 'color': "red"},  # Rejected
+                           {'range': [50, 100], 'color': "green"}  # Accepted
+                       ],
+                       'threshold': {'line': {'color': "black", 'width': 4}, 'thickness': 0.75, 'value': 50}}
+            ))
+            fig.update_layout(height=400)  # Doubler la hauteur
+            st.plotly_chart(fig)
     else:
         st.warning("Veuillez sélectionner un ID client.")
 
