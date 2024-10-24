@@ -1,10 +1,9 @@
-import pandas as pd
+import pandas as pd 
 import pickle
 import requests
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
-from plotly.subplots import make_subplots
 from lime.lime_tabular import LimeTabularExplainer
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,13 +18,8 @@ X_sample = df_test.drop(columns=['TARGET', 'SK_ID_CURR'])
 with open('best_xgb_model.pkl', 'rb') as f:
     bestmodel = pickle.load(f)
 
-# Charger le scaler
-with open('scaler.pkl', 'rb') as f:
-    scaler = pickle.load(f)
-
-# Extraire le modèle final du pipeline
+# Extraire le modèle final du pipeline (sans scaler)
 model = bestmodel.named_steps['xgb']
-
 
 # Fonction pour obtenir les données du client
 def get_customer_data(SK_ID_CURR):
@@ -35,7 +29,6 @@ def get_customer_data(SK_ID_CURR):
     else:
         st.error(f"API error: {response.status_code}")
         return None
-
 
 # Interface utilisateur Streamlit
 st.title("Credit Risk Prediction Dashboard")
@@ -79,42 +72,32 @@ if st.button("Get Credit Score"):
                        ],
                        'threshold': {'line': {'color': "black", 'width': 4}, 'thickness': 0.75, 'value': 50}}
             ))
-            fig.update_layout(height=400)  # Doubler la hauteur
+            fig.update_layout(height=400)  # Ajuster la hauteur
             st.plotly_chart(fig)
     else:
         st.warning("Veuillez sélectionner un ID client.")
 
-# Pour les explications globales en utilisant LIME
+# Pour les explications globales en utilisant LIME (sans scaler)
 if st.button("Get Global Explanation"):
     # Créer un explainer LIME pour les données
     explainer = LimeTabularExplainer(X_sample.values, feature_names=X_sample.columns,
                                      class_names=['Rejected', 'Accepted'], mode='classification')
 
     # Sélectionner un échantillon de données pour les explications locales
-    sample_indices = X_sample.index
-    sample_data = X_sample.loc[sample_indices]
-
-    # Assurez-vous que le scaler ne sélectionne que les caractéristiques présentes dans X_sample
-    caractéristiques_communes = [caractéristique for caractéristique in scaler.feature_names_in_ if
-                                 caractéristique in X_sample.columns]
-    scaler = scaler.fit(X_sample[caractéristiques_communes])
-
-    # Transformez les données d'échantillon en utilisant le scaler mis à jour
-    sample_data_scaled = scaler.transform(sample_data[caractéristiques_communes])
+    sample_data = X_sample.copy()
 
     # Générer des explications locales pour chaque instance de l'échantillon
     feature_importances = np.zeros(X_sample.shape[1])
-    for i in range(sample_data_scaled.shape[0]):
-        exp = explainer.explain_instance(sample_data_scaled[i], model.predict_proba, num_features=X_sample.shape[1])
+    for i in range(sample_data.shape[0]):
+        exp = explainer.explain_instance(sample_data.values[i], model.predict_proba, num_features=X_sample.shape[1])
         for feature, importance in exp.as_list():
-            # Nettoyer le nom de la caractéristique pour correspondre aux noms des colonnes
             clean_feature = feature.split(' <= ')[0].split(' > ')[0].strip()
             if clean_feature in X_sample.columns:
                 feature_index = X_sample.columns.get_loc(clean_feature)
                 feature_importances[feature_index] += importance
 
     # Calculer l'importance moyenne des caractéristiques
-    feature_importances /= sample_data_scaled.shape[0]
+    feature_importances /= sample_data.shape[0]
 
     # Créer un DataFrame pour les importances des caractéristiques
     importance_df = pd.DataFrame({'Feature': X_sample.columns, 'Importance': feature_importances})
@@ -133,7 +116,7 @@ if st.button("Get Global Explanation"):
     st.plotly_chart(fig_high)
     st.plotly_chart(fig_low)
 
-# Pour les explications locales avec LIME
+# Pour les explications locales avec LIME (sans scaler)
 if st.button("Get Local Explanation"):
     if SK_ID_CURR != '':
         SK_ID_CURR_int = int(SK_ID_CURR)
@@ -141,40 +124,18 @@ if st.button("Get Local Explanation"):
         # Obtenir les données du client pour l'explication LIME
         X_cust = X_sample.loc[df_test['SK_ID_CURR'] == SK_ID_CURR_int]
 
-        # Assurez-vous que le scaler ne sélectionne que les caractéristiques présentes dans X_sample
-        caractéristiques_communes = [caractéristique for caractéristique in scaler.feature_names_in_
-                                     if caractéristique in X_sample.columns]
-        scaler = scaler.fit(X_sample[caractéristiques_communes])
+        # Créer un explainer LIME pour les données
+        explainer = LimeTabularExplainer(X_sample.values,
+                                         feature_names=X_sample.columns,
+                                         class_names=['Rejected', 'Accepted'],
+                                         mode='classification')
 
-        # Vérifier si les colonnes de X_cust correspondent à celles du scaler
-        missing_cols = set(scaler.feature_names_in_) - set(X_cust.columns)
-        if missing_cols:
-            # Ajouter les colonnes manquantes avec des valeurs par défaut
-            for col in missing_cols:
-                X_cust[col] = 0
+        # Générer l'explication pour le client avec LIME
+        exp = explainer.explain_instance(X_cust.values[0], model.predict_proba, num_features=10)
 
-        # S'assurer que les colonnes sont dans le bon ordre pour le scaler
-        X_cust_aligned = X_cust[scaler.feature_names_in_]
-
-        # Traiter les valeurs manquantes
-        X_cust_aligned.fillna(0, inplace=True)  # Remplir avec 0
-
-        # Vérifier si X_cust_aligned n'est pas vide avant la transformation
-        if not X_cust_aligned.empty:
-            X_cust_scaled = scaler.transform(X_cust_aligned)
-
-            # Créer un explainer LIME pour les données
-            explainer = LimeTabularExplainer(X_sample[caractéristiques_communes].values,
-                                             feature_names=caractéristiques_communes,
-                                             class_names=['Rejected', 'Accepted'],
-                                             mode='classification')
-
-            # Générer l'explication pour le client avec LIME
-            exp = explainer.explain_instance(X_cust_scaled[0], model.predict_proba, num_features=10)
-
-            # Afficher le graphique LIME dans Streamlit
-            fig = exp.as_pyplot_figure()
-            plt.title('Importance Locale des Variables (LIME)')
-            st.pyplot(fig)
+        # Afficher le graphique LIME dans Streamlit
+        fig = exp.as_pyplot_figure()
+        plt.title('Importance Locale des Variables (LIME)')
+        st.pyplot(fig)
     else:
         st.warning("Veuillez sélectionner un ID client.")
