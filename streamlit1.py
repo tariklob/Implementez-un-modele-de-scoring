@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
 
 # Charger les données de test
-df_test = pd.read_csv('data_test.csv')
+df_test = pd.read_csv('data_sample.csv')
 X_sample = df_test.drop(columns=['TARGET', 'SK_ID_CURR'])
 
 # Charger le modèle (pipeline)
