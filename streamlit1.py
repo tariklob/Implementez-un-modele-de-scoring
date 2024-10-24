@@ -50,7 +50,7 @@ if st.button("Get Customer Data"):
         st.warning("Veuillez sélectionner un ID client.")
 
 # Obtenir le score de crédit
-def display_credit_score(SK_ID_CURR):
+if st.button("Get Credit Score"):
     if SK_ID_CURR:
         response = requests.get(f'{BASE_URL}/app/scoring_cust_test/', params={'SK_ID_CURR': SK_ID_CURR})
         if response.status_code == 200:
@@ -74,17 +74,8 @@ def display_credit_score(SK_ID_CURR):
             ))
             fig.update_layout(height=400)  # Ajuster la hauteur
             st.plotly_chart(fig)
-        else:
-            st.error(f"API error: {response.status_code}")
     else:
         st.warning("Veuillez sélectionner un ID client.")
-
-# Obtenir le score de crédit quand un client est sélectionné
-if SK_ID_CURR:
-    display_credit_score(SK_ID_CURR)
-else:
-    st.warning("Veuillez sélectionner un ID client.")
-
 
 # Pour les explications globales en utilisant LIME (sans scaler)
 if st.button("Get Global Explanation"):
