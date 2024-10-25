@@ -8,7 +8,8 @@ from lime.lime_tabular import LimeTabularExplainer
 import numpy as np
 import matplotlib.pyplot as plt
 
-BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
+BASE_URL = "https://airedale-crack-meerkat.ngrok-free.app/"
+#BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
 #BASE_URL = "http://127.0.0.1:8080"
 
 # Charger les données de test
