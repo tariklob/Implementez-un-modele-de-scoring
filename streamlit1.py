@@ -13,7 +13,7 @@ BASE_URL = "https://airedale-crack-meerkat.ngrok-free.app/"
 #BASE_URL = "http://127.0.0.1:8080"
 
 # Charger les données de test
-df_test = pd.read_csv('data_sample.csv')
+df_test = pd.read_csv('data_test.csv')
 X_sample = df_test.drop(columns=['TARGET', 'SK_ID_CURR'])
 
 # Charger le modèle (pipeline)
