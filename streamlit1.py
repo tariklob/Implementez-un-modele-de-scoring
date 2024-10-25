@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import pickle
 import requests
 import streamlit as st
@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 BASE_URL = "https://appli-42e4dc055e71.herokuapp.com/"
+#BASE_URL = "http://127.0.0.1:8080"
 
 # Charger les données de test
 df_test = pd.read_csv('data_sample.csv')
